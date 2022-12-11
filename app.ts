@@ -25,7 +25,7 @@ let balance = Math.floor(Math.random() * 100000);
 async function welcome() {
     const rainbowTitle = chalkAnimation.rainbow(
         `
-              Welcome to the ATM Machine \n        
+              Welcome to the ATM \n        
         `
     );
     await sleep();
@@ -34,8 +34,8 @@ async function welcome() {
 
     console.log(gradient.pastel.multiline(figlet.textSync("ATM", { horizontalLayout: 'full' })))
 
-    
-    
+
+
     console.log('\n');
     console.log(
         `
@@ -53,12 +53,12 @@ await welcome()
 
 // take input form user
 let atm_input = async () => {
-    let result: Answers = await inquirer.prompt([        
+    let result: Answers = await inquirer.prompt([
         {
             name: "accType",
             type: "list",
             choices: ["Current Account", "Saving Account"],
-            message: "please choose your account type: ",            
+            message: "please choose your account type: ",
         },
         {
             name: "options",
@@ -75,7 +75,7 @@ let atm_input = async () => {
             when(answers) {
                 return answers.accType;
             },
-        },        
+        },
     ]);
 
     return result;
@@ -103,9 +103,9 @@ let handleTransfers = async (amount: number) => {
         console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
     } else if (amount) {
         balance -= amount;
-        
-        console.log(`${chalk.green.bold(`Sucessful \n Transfer Amount amount`)}`);
-        console.log(`your remaining balance is ${balance}`);        
+
+        console.log(`${chalk.green.bold(`Sucessful \n Transfer Amount ${amount}`)}`);
+        console.log(`your remaining balance is ${balance}`);
     } else {
         console.log("something went wrong");
     }
@@ -136,42 +136,124 @@ let payUtilityBills = async () => {
         console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
     }
     else if (billInformation) {
-        console.log(`${chalk.green.bold(`Paying ${billInformation.payment_amount} PKR to ${billInformation.utility_company} form account number ${billInformation.account_number}`)}`);         
+        console.log(`${chalk.green.bold(`Paying ${billInformation.payment_amount} PKR to ${billInformation.utility_company} form account number ${billInformation.account_number}`)}`);
     }
 }
 
 
+// take user information 
+let takeUserInformation = async () => {
+    let { options } = await atm_input();
+
+
+    if (options === "Balance Inquiry") {
+        console.log(`${chalk.green.bold(`Your current balance is: ${balance} PKR`)}`);
+        await takeUserInformation()
+    }
+    // cash withdraw
+    else if (options === "Cash Withdraw") {
+        let result = await inquirer.prompt([
+            {
+                type: "input",
+                name: "amount",
+                message: "How much would you like to withdraw?",
+            },
+        ]);
+
+        if (true) {
+            const amount = parseInt(result.amount);
+            if (amount > balance) {
+                console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
+            } else {
+                balance -= amount;
+                console.log(`${chalk.green.bold(`${amount} PKR withdrawn. Your new balance is: ${balance}`)}`);
+                await takeUserInformation()
+            }
+        }
+
+    }
+    // deposit funds
+    else if (options === "Deposit funds") {
+        let result = await inquirer.prompt([
+            {
+                type: "input",
+                name: "amount",
+                message: "How much would you like to deposit?",
+            },
+        ]);
+
+        if (result.amount) {
+            const amount = parseInt(result.amount);
+            balance += amount;
+            console.log(
+                `${chalk.green.bold(`${amount} PKR deposited. Your new balance is: ${balance}PKR`)}`
+            );
+            await takeUserInformation()
+        }
+    }
+    // fund trunsfer
+    else if (options === "Fund Transfer") {
+        await handleTransferAccounts();
+        const transferAmount = await inquirer.prompt([
+            {
+                name: "Amount",
+                type: "input",
+                message: "Transfer Amount",
+                validate: (input) => {
+                    if (Number(input)) {
+                        return true;
+                    } else {
+                        return "Invalid Amount";
+                    }
+                },
+            },
+        ]);
+
+        await handleTransfers(transferAmount.Amount);
+        await takeUserInformation()
+    }
+    // pay utility bills
+    else if (options === "Utility Bill") {
+        await payUtilityBills()
+        await takeUserInformation()
+    }
+    else if (options === "Exit") {
+        console.log("Goodbye!");
+    }
+
+
+}
 
 
 
 let signIn = async () => {
     const username = faker.internet.userName();
     const password = faker.internet.password();
-  
+
     console.log(
         `
          ${chalk.hex('#FFA500').bold(`your username is ${chalk.red.bold('==>')} ${chalk.green.bold(username)}`)}   
          ${chalk.hex('#FFA500').bold(`your password is ${chalk.red.bold('==>')} ${chalk.green.bold(password)}`)}         
         `
-    )   
-    
-    
+    )
+
+
     let sign_in = await inquirer.prompt([
-      {
-          type: 'input',
-          name: 'username',
-          message: 'Enter your username:'
-      },
-      {
-         type: 'password',
-         mask: "#",
-         name: 'password',
-         message: 'Enter your password:'
-      }    
-    ])         
-    
+        {
+            type: 'input',
+            name: 'username',
+            message: 'Enter your username:'
+        },
+        {
+            type: 'password',
+            mask: "#",
+            name: 'password',
+            message: 'Enter your password:'
+        }
+    ])
+
     if (sign_in.username === username && sign_in.password === password) {
-    //    await takeUserInformation()          
+        await takeUserInformation()
     } else {
         console.log('Invalid username or password.');
     }
