@@ -39,7 +39,7 @@ async function welcome() {
     console.log('\n');
     console.log(
         `
-         ${chalk.cyan.bold(`how to sign in?`)}          
+         ${chalk.cyan.bold(`how to sign in?`)}                   
          ${chalk.hex('#FFA500').bold(`first, we give you an auto-generated username and password`)} 
          ${chalk.hex('#FFA500').bold(`you just enter the auto-generated username and password to unlock our atm machine features like`)}
          ${chalk.green.bold(`fund-transfers fund-withdrawals fund-deposits and pay utility-bills.`)}       
@@ -50,6 +50,36 @@ async function welcome() {
 }
 
 await welcome()
+
+// take input form user
+let atm_input = async () => {
+    let result: Answers = await inquirer.prompt([        
+        {
+            name: "accType",
+            type: "list",
+            choices: ["Current Account", "Saving Account"],
+            message: "please choose your account type: ",            
+        },
+        {
+            name: "options",
+            type: "list",
+            choices: [
+                "Fund Transfer",
+                "Cash Withdraw",
+                "Deposit funds",
+                "Balance Inquiry",
+                "Utility Bill",
+                "Exit"
+            ],
+            message: "choose one of the given below options: ",
+            when(answers) {
+                return answers.accType;
+            },
+        },        
+    ]);
+
+    return result;
+};
 
 
 let signIn = async () => {
