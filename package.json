@@ -1,7 +1,8 @@
 {
   "name": "project02-atm-with-typescript-and-node.js",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
+  "type": "module",
   "repository": "https://github.com/HamzaAhmedSheikh/project02-atm-with-typescript-and-node.js.git",
   "author": "HamzaAhmedSheikh <hamzaahmedsheikh313@gmail.com>",
   "license": "MIT",
