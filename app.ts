@@ -50,3 +50,39 @@ async function welcome() {
 }
 
 await welcome()
+
+
+let signIn = async () => {
+    const username = faker.internet.userName();
+    const password = faker.internet.password();
+  
+    console.log(
+        `
+         ${chalk.hex('#FFA500').bold(`your username is ${chalk.red.bold('==>')} ${chalk.green.bold(username)}`)}   
+         ${chalk.hex('#FFA500').bold(`your password is ${chalk.red.bold('==>')} ${chalk.green.bold(password)}`)}         
+        `
+    )   
+    
+    
+    let sign_in = await inquirer.prompt([
+      {
+          type: 'input',
+          name: 'username',
+          message: 'Enter your username:'
+      },
+      {
+         type: 'password',
+         mask: "#",
+         name: 'password',
+         message: 'Enter your password:'
+      }    
+    ])         
+    
+    if (sign_in.username === username && sign_in.password === password) {
+    //    await takeUserInformation()          
+    } else {
+        console.log('Invalid username or password.');
+    }
+}
+
+signIn()
