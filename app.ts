@@ -81,6 +81,68 @@ let atm_input = async () => {
     return result;
 };
 
+// handle-transfer-account
+const handleTransferAccounts = async function () {
+    const transferTo = await inquirer.prompt({
+        name: "username",
+        type: "input",
+        message: "Account Holders Name:",
+        validate: (input) => {
+            if (Number(input)) {
+                return "Invalid Name";
+            } else {
+                return true;
+            }
+        },
+    });
+};
+
+let handleTransfers = async (amount: number) => {
+
+    if (amount > balance) {
+        console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
+    } else if (amount) {
+        balance -= amount;
+        
+        console.log(`${chalk.green.bold(`Sucessful \n Transfer Amount amount`)}`);
+        console.log(`your remaining balance is ${balance}`);        
+    } else {
+        console.log("something went wrong");
+    }
+};
+
+// user-pay-utility-bills
+
+let payUtilityBills = async () => {
+    let billInformation = await inquirer.prompt([
+        {
+            type: "input",
+            name: "utility_company",
+            message: "Enter the name of the utility company:",
+        },
+        {
+            type: "input",
+            name: "account_number",
+            message: "Enter your account number:",
+        },
+        {
+            type: "input",
+            name: "payment_amount",
+            message: "Enter the amount you want to pay:",
+        },
+    ]);
+
+    if (billInformation.payment_amount > balance) {
+        console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
+    }
+    else if (billInformation) {
+        console.log(`${chalk.green.bold(`Paying ${billInformation.payment_amount} PKR to ${billInformation.utility_company} form account number ${billInformation.account_number}`)}`);         
+    }
+}
+
+
+
+
 
 let signIn = async () => {
     const username = faker.internet.userName();
