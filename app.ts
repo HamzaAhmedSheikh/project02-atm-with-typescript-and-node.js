@@ -6,11 +6,7 @@ import chalkAnimation from "chalk-animation";
 import figlet from "figlet";
 import gradient from "gradient-string";
 
-let sleep = () => {
-    return new Promise((res) => {
-        setTimeout(res, 2000);
-    })
-}
+
 
 type Answers = {
     user_name: string;
@@ -22,6 +18,12 @@ type Answers = {
 
 // balance for atm users
 let balance = Math.floor(Math.random() * 100000);
+
+let sleep = () => {
+    return new Promise((res) => {
+        setTimeout(res, 2000);
+    })
+}
 
 async function welcome() {
     const rainbowTitle = chalkAnimation.rainbow(
@@ -40,47 +42,17 @@ async function welcome() {
     console.log('\n');
     console.log(
         `
-         ${chalk.cyan.bold(`how to sign in?`)}                   
-         ${chalk.hex('#FFA500').bold(`first, we give you an auto-generated username and password`)} 
+         ${chalk.cyan.bold(`How to sign in?`)}                   
+         ${chalk.hex('#FFA500').bold(`First, we give you an auto-generated username and password`)} 
          ${chalk.hex('#FFA500').bold(`you just enter the auto-generated username and password to unlock our atm machine features like`)}
-         ${chalk.green.bold(`fund-transfers fund-withdrawals fund-deposits and pay utility-bills.`)}       
-         ${chalk.red.bold(`if you want to exit our atm machine just go Current Account or Saving Account option `)} 
-         ${chalk.red.bold(`and just select the exit option you will exit our atm machine.`)}         
+         ${chalk.green.bold(`fund transfers, fund withdrawals, fund deposits and pay utility-bills.`)}       
+                 
         `
     );
 }
 
 await welcome()
 
-// take input form user
-let atm_input = async () => {
-    let result: Answers = await inquirer.prompt([
-        {
-            name: "accType",
-            type: "list",
-            choices: ["Current Account", "Saving Account"],
-            message: "please choose your account type: ",
-        },
-        {
-            name: "options",
-            type: "list",
-            choices: [
-                "Fund Transfer",
-                "Cash Withdraw",
-                "Deposit funds",
-                "Balance Inquiry",
-                "Utility Bill",
-                "Exit"
-            ],
-            message: "choose one of the given below options: ",
-            when(answers) {
-                return answers.accType;
-            },
-        },
-    ]);
-
-    return result;
-};
 
 // handle-transfer-account
 const handleTransferAccounts = async function () {
@@ -101,14 +73,14 @@ const handleTransferAccounts = async function () {
 let handleTransfers = async (amount: number) => {
 
     if (amount > balance) {
-        console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
+        console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")} \n`);
     } else if (amount) {
         balance -= amount;
-
-        console.log(`${chalk.green.bold(`Sucessful \n Transfer Amount ${amount}`)}`);
-        console.log(`your remaining balance is ${balance}`);
+        
+        console.log(`${chalk.green.bold(`Your transaction is successful and the transfer amount is ${amount} PKR`)} \n`);
+        console.log(`${chalk.blue.bold(`your remaining balance is ${balance} PKR`)} \n`);        
     } else {
-        console.log("something went wrong");
+        console.log("something went wrong \n");
     }
 };
 
@@ -134,23 +106,51 @@ let payUtilityBills = async () => {
     ]);
 
     if (billInformation.payment_amount > balance) {
-        console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
+        console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")} \n`);
     }
     else if (billInformation) {
-        console.log(`${chalk.green.bold(`Paying ${billInformation.payment_amount} PKR to ${billInformation.utility_company} form account number ${billInformation.account_number}`)}`);
+        balance -= billInformation.payment_amount
+        console.log(`${chalk.green.bold(`Paying ${billInformation.payment_amount} PKR to ${billInformation.utility_company} form account number ${billInformation.account_number}`)} \n`);         
     }
 }
 
+let userInput = async () => {
+    let atmInput: Answers = await inquirer.prompt([
+        {
+            name: "options",
+            type: "list",
+            choices: [
+                "Fund Transfer",
+                "Cash Withdraw",
+                "Deposit funds",
+                "Balance Inquiry",
+                "Utility Bill",                
+            ],
+            message: "choose one of the given below options: ",                
+        },  
+    ])
 
-// take user information 
-let takeUserInformation = async () => {
-    let { options } = await atm_input();
+    return atmInput
+ }
 
+let atm_input = async () => {    
+    let result: Answers = await inquirer.prompt([        
+        {
+            name: "accType",
+            type: "list",
+            choices: ["Current Account", "Saving Account", "Exit"],
+            message: "Do you want to perform the transaction or exit?: ",            
+        },                  
+    ]);
 
-    if (options === "Balance Inquiry") {
-        console.log(`${chalk.green.bold(`Your current balance is: ${balance} PKR`)}`);
-        await takeUserInformation()
-    }
+    if(result.accType === "Current Account" || result.accType === "Saving Account") {
+        let { options } = await userInput()
+
+        if (options === "Balance Inquiry") {                                         
+            console.log(`${chalk.green.bold(`Your current balance is: ${balance} PKR \n`)}`);       
+            await atm_input()       
+        }
+
     // cash withdraw
     else if (options === "Cash Withdraw") {
         let result = await inquirer.prompt([
@@ -164,15 +164,17 @@ let takeUserInformation = async () => {
         if (true) {
             const amount = parseInt(result.amount);
             if (amount > balance) {
-                console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")}`);
+                console.log(`${chalk.red.bold("Insufficient funds. Please enter a different amount.")} \n`);
+                await atm_input()
             } else {
                 balance -= amount;
-                console.log(`${chalk.green.bold(`${amount} PKR withdrawn. Your new balance is: ${balance}`)}`);
-                await takeUserInformation()
+                console.log(`${chalk.green.bold(`${amount} PKR withdrawn. Your new balance is: ${balance} PKR`)} \n`);  
+                await atm_input()              
             }
         }
-
+        
     }
+
     // deposit funds
     else if (options === "Deposit funds") {
         let result = await inquirer.prompt([
@@ -187,11 +189,13 @@ let takeUserInformation = async () => {
             const amount = parseInt(result.amount);
             balance += amount;
             console.log(
-                `${chalk.green.bold(`${amount} PKR deposited. Your new balance is: ${balance}PKR`)}`
-            );
-            await takeUserInformation()
+              `${chalk.green.bold(`${amount} PKR deposited. Your new balance is: ${balance}PKR`)} \n`
+            );  
+            
+            await atm_input()
         }
     }
+
     // fund trunsfer
     else if (options === "Fund Transfer") {
         await handleTransferAccounts();
@@ -210,54 +214,61 @@ let takeUserInformation = async () => {
             },
         ]);
 
-        await handleTransfers(transferAmount.Amount);
-        await takeUserInformation()
-    }
-    // pay utility bills
-    else if (options === "Utility Bill") {
-        await payUtilityBills()
-        await takeUserInformation()
-    }
-    else if (options === "Exit") {
-        console.log("Goodbye!");
+        await handleTransfers(transferAmount.Amount);       
+        atm_input()
     }
 
+    else if(options === "Utility Bill") {       
+        await payUtilityBills()  
+        await atm_input()     
+    }    
+   
+    else {
+        console.log('please choose given options');            
+    }
+        
+        
+    }
+    else if(result.accType === "Exit") {
+        console.log('Thank you! for using the ATM.');        
+    } else {
+        console.log('please select correct option');
+        
+    }
 
-}
-
-
+};
 
 let signIn = async () => {
     const username = faker.internet.userName();
     const password = faker.internet.password();
-
+  
     console.log(
         `
          ${chalk.hex('#FFA500').bold(`your username is ${chalk.red.bold('==>')} ${chalk.green.bold(username)}`)}   
          ${chalk.hex('#FFA500').bold(`your password is ${chalk.red.bold('==>')} ${chalk.green.bold(password)}`)}         
         `
-    )
-
-
+    )   
+    
+    
     let sign_in = await inquirer.prompt([
-        {
-            type: 'input',
-            name: 'username',
-            message: 'Enter your username:'
-        },
-        {
-            type: 'password',
-            mask: "#",
-            name: 'password',
-            message: 'Enter your password:'
-        }
-    ])
-
+      {
+          type: 'input',
+          name: 'username',
+          message: 'Enter your username:'
+      },
+      {
+         type: 'password',
+         mask: "#",
+         name: 'password',
+         message: 'Enter your password:'
+      }    
+    ])         
+    
     if (sign_in.username === username && sign_in.password === password) {
-        await takeUserInformation()
+       await atm_input()          
     } else {
         console.log('Invalid username or password.');
     }
 }
 
-signIn()
+await signIn()
