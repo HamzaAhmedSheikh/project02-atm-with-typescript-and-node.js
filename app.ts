@@ -78,7 +78,7 @@ let handleTransfers = async (amount: number) => {
         balance -= amount;
         
         console.log(`${chalk.green.bold(`Your transaction is successful and the transfer amount is ${amount} PKR`)} \n`);
-        console.log(`${chalk.blue.bold(`your remaining balance is ${balance} PKR`)} \n`);        
+        console.log(`${chalk.blue.bold(`Your remaining balance is ${balance} PKR`)} \n`);        
     } else {
         console.log("something went wrong \n");
     }
@@ -122,7 +122,7 @@ let userInput = async () => {
             choices: [
                 "Fund Transfer",
                 "Cash Withdraw",
-                "Deposit funds",
+                "Deposit Funds",
                 "Balance Inquiry",
                 "Utility Bill",                
             ],
