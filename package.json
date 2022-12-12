@@ -1,6 +1,6 @@
 {
   "name": "project02-atm-with-typescript",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "main": "app.js",
   "bin": "./app.js",
   "type": "module",
